@@ -26,6 +26,15 @@ from app.routers.conversations import router as conversations_router
 from app.routers.history import router as history_router
 
 load_dotenv()
+_env_candidates = [
+    Path.cwd() / ".env",
+    Path(__file__).resolve().parent.parent / ".env",
+    Path(__file__).resolve().parent.parent.parent / ".env",
+]
+for _env_path in _env_candidates:
+    if _env_path.exists():
+        load_dotenv(_env_path)
+
 logger = configure_logging()
 
 base_upload_dir = Path(os.getenv("UPLOAD_DIR", "./uploads"))
@@ -57,6 +66,7 @@ frontend_origin = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[frontend_origin, "http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origin_regex=r"^https?:\/\/.*$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -383,11 +393,14 @@ def delete_document(filename: str) -> dict:
     return {"message": "Document deleted", "filename": filename}
 
 
-# Optional: Serve built Frontend SPA for unified container / Hugging Face Spaces deployment
+# Optional: Serve built Frontend SPA for Hugging Face Spaces / single container deployment
 _static_candidates = [
+    Path.cwd() / "static",
+    Path(__file__).resolve().parent.parent.parent / "static",
+    Path(__file__).resolve().parent.parent.parent.parent / "static",
+    Path(__file__).resolve().parent.parent / "static",
     Path("/home/user/app/static"),
     Path("/app/static"),
-    Path(__file__).resolve().parent.parent / "static",
     Path(__file__).resolve().parent.parent.parent.parent / "frontend" / "client" / "dist",
 ]
 _static_dir = next((c for c in _static_candidates if c.exists() and (c / "index.html").exists()), None)

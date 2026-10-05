@@ -15,56 +15,47 @@ RUN npm run build
 
 # ==========================================
 # Stage 2: Production Runtime (FastAPI Backend)
-# Configured for Hugging Face Spaces (UID 1000, Port 7860) & Cloud
 # ==========================================
 FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PORT=7860 \
+    PORT=8000 \
+    HF_HOME=/root/.cache/huggingface \
     HF_HUB_OFFLINE=1 \
-    TRANSFORMERS_OFFLINE=1
+    TRANSFORMERS_OFFLINE=1 \
+    VECTOR_DB_DIR=/app/vectorstore \
+    UPLOAD_DIR=/app/uploads
 
 # Install system dependencies:
-# - curl: healthchecks
+# - curl: container healthcheck
 # - libgomp1: required by FAISS CPU on Linux
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Hugging Face Spaces requirement: run as non-root user with UID 1000
-RUN useradd -m -u 1000 user
-ENV HOME=/home/user \
-    PATH=/home/user/.local/bin:$PATH \
-    HF_HOME=/home/user/.cache/huggingface \
-    VECTOR_DB_DIR=/home/user/app/vectorstore \
-    UPLOAD_DIR=/home/user/app/uploads
-
-WORKDIR /home/user/app
+WORKDIR /app
 
 # Install Python dependencies
 COPY backend/backend-python/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Pre-cache the HuggingFace embedding model at build time for instant cold starts
+# Pre-cache the HuggingFace embedding model at build time for instant cold starts and offline execution
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')"
 
 # Copy backend application source
-COPY --chown=user:user backend/backend-python/app /home/user/app/app
+COPY backend/backend-python/app /app/app
 
-# Copy built frontend assets into static directory (FastAPI mounts this at / automatically)
-COPY --chown=user:user --from=frontend-builder /build/dist /home/user/app/static
+# Copy built frontend assets into /app/static (FastAPI mounts this at / automatically)
+COPY --from=frontend-builder /build/dist /app/static
 
-# Create persistent storage directories and assign permissions to user 1000
-RUN mkdir -p /home/user/app/vectorstore /home/user/app/uploads && \
-    chown -R user:user /home/user
+# Create persistent storage directories
+RUN mkdir -p /app/vectorstore /app/uploads
 
-USER user
-
-EXPOSE 7860
+EXPOSE 8000
 
 HEALTHCHECK --interval=15s --timeout=5s --start-period=15s --retries=3 \
-    CMD curl --fail http://localhost:${PORT:-7860}/health || exit 1
+    CMD curl --fail http://localhost:8000/health || exit 1
 
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-7860}"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

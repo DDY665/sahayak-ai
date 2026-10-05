@@ -20,14 +20,9 @@ from app.rag_engine.ocr import extract_ocr_from_pdf, extract_ocr_from_image
 load_dotenv()
 logger = logging.getLogger(__name__)
 
-# Adaptive offline loading: on Windows default to offline to avoid hub timeouts, but respect environment override
-hf_offline = os.getenv("HF_HUB_OFFLINE", "1" if os.name == "nt" else "0")
-if hf_offline == "1":
-    os.environ["HF_HUB_OFFLINE"] = "1"
-    os.environ["TRANSFORMERS_OFFLINE"] = "1"
-    local_files_only = True
-else:
-    local_files_only = False
+# Force offline loading to eliminate remote HuggingFace timeouts on Windows
+os.environ["HF_HUB_OFFLINE"] = "1"
+os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
 
 class RAGStoreMixin(SessionStoreMixin):
@@ -41,7 +36,7 @@ class RAGStoreMixin(SessionStoreMixin):
                 "EMBEDDING_MODEL",
                 "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
             ),
-            model_kwargs={"device": "cpu", "local_files_only": local_files_only},
+            model_kwargs={"device": "cpu", "local_files_only": True},
             encode_kwargs={"normalize_embeddings": True},
         )
         self.splitter = RecursiveCharacterTextSplitter(
@@ -50,37 +45,24 @@ class RAGStoreMixin(SessionStoreMixin):
         self.summary_llm = build_llm_from_env(purpose="summary")
         self.chat_llm = build_llm_from_env(purpose="chat")
         self.prompt = ChatPromptTemplate.from_template(
-            """You are SahayakAI, an intelligent, empathetic, and expert document assistant.
-Your job is to explain document contents in simple, clear language and have natural, helpful conversations about the document.
-You handle technical papers, medical reports, government schemes, financial/bank documents, and general documents.
+            """
+    You are SahayakAI, a helpful document assistant.
+    Your job is to explain document contents in simple, clear language.
+    You can handle medical reports, government scheme documents, and bank or loan documents.
+    Answer ONLY based on the context provided below. This context comes from uploaded document chunks.
+    If the answer is not in the context, say: "I could not find this information in the document."
+    Always respond in {language}.
+    Use simple language that a non-technical person can understand.
+    Do not use jargon without explaining it.
+    Each context block includes a source label like [filename]. Use these labels when citing where information came from.
 
-Conversation History:
-{history_context}
+    Context:
+    {context}
 
-Document Context:
-{context}
+    Question: {question}
 
-Current User Input: {question}
-
-Instructions:
-1. Conversational Continuity & Context:
-   - Pay close attention to the Conversation History.
-   - If you previously asked the user a question, gave a quiz, or presented options (e.g., A, B, C, D) and the user responds with their answer (e.g., "A", "B", "option 2", "yes", "no"), evaluate their response, state whether they are correct or incorrect, and clearly explain why using the document context.
-   - If the user provides a short or vague follow-up (e.g., "why?", "explain that", "what do you mean?", "tell me more", "how?"), understand it in relation to the previous discussion and the document context, and provide a clear, helpful explanation.
-   - If the user asks for a quiz or test (e.g., "test me", "quiz me"), generate an engaging question with options based on the document.
-
-2. Document Grounding:
-   - Base your factual statements on the Document Context provided.
-   - If the user asks about a specific fact, policy, or detail that is genuinely not mentioned anywhere in the document context and cannot be inferred, politely let them know that this specific detail is not mentioned in the document.
-   - Do NOT say "I could not find this information in the document" when the user is simply chatting, answering a quiz question, saying hello/thank you, or asking a follow-up about prior statements.
-
-3. Tone and Formatting:
-   - Always respond in {language}.
-   - Use simple language that a non-technical person can easily understand. Explain any technical jargon.
-   - Format responses clearly using markdown (bold text, bullet points, numbered lists, or tables where appropriate).
-   - Each context block includes a source label like [filename]. Reference or cite [filename] when mentioning specific facts from the document.
-
-Helpful Answer:"""
+    Helpful Answer (explain clearly, cite [filename]):
+    """
         )
 
     def _resolve_session_db_dir(self, user_id: str, chat_id: str) -> Path:
