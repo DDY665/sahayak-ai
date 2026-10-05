@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: sahayakai
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: python server.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      - key: GROQ_CHAT_API_KEY
+        sync: false
+      - key: GROQ_SUMMARY_API_KEY
+        sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
