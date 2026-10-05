@@ -58,10 +58,10 @@ class RAGAnsweringMixin:
         try:
             response = chain.invoke(self._build_chat_prompt_inputs(question, context, language, history))
         except Exception as exc:
-            logger.warning("Answer generation failed: %s", exc)
+            logger.error("Answer generation failed: %s", exc, exc_info=True)
             if _is_rate_limit_error(exc):
                 return ("The AI service is temporarily rate-limited. Please try again in a few minutes.", [])
-            return ("I could not generate an answer right now. Please try again shortly.", [])
+            return (f"I could not generate an answer right now. Please try again shortly. (Error: {exc})", [])
 
         answer_text = getattr(response, "content", str(response))
         citations = [
@@ -117,10 +117,10 @@ class RAGAnsweringMixin:
         try:
             stream = chain.stream(self._build_chat_prompt_inputs(question, context, language, history))
         except Exception as exc:
-            logger.warning("Stream setup failed: %s", exc)
+            logger.error("Stream setup failed: %s", exc, exc_info=True)
             if _is_rate_limit_error(exc):
                 return iter(["The AI service is temporarily rate-limited. Please try again in a few minutes."]), []
-            return iter(["I could not generate an answer right now. Please try again shortly."]), []
+            return iter([f"I could not generate an answer right now. (Error: {exc})"]), []
 
         def generator() -> Iterable[str]:
             try:
@@ -129,10 +129,10 @@ class RAGAnsweringMixin:
                     if token:
                         yield token
             except Exception as exc:
-                logger.warning("Stream generation failed: %s", exc)
+                logger.error("Stream generation failed: %s", exc, exc_info=True)
                 if _is_rate_limit_error(exc):
                     yield "The AI service is temporarily rate-limited. Please try again in a few minutes."
                 else:
-                    yield "I could not generate an answer right now. Please try again shortly."
+                    yield f"I could not generate an answer right now. (Error: {exc})"
 
         return generator(), citations

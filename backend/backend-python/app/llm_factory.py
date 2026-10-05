@@ -22,5 +22,5 @@ def _groq_api_key_for_purpose(purpose: str) -> str:
 
 def build_llm_from_env(purpose: str = "chat") -> ChatGroq:
     api_key = _groq_api_key_for_purpose(purpose)
-    model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+    model = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
     return ChatGroq(model=model, temperature=0, groq_api_key=api_key or "gsk_placeholder_pending_config")
