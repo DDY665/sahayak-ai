@@ -19,6 +19,19 @@ if "app" in sys.modules and not hasattr(sys.modules["app"], "__path__"):
 import uvicorn
 from app.main import app
 
+# ZeroGPU Compatibility: If the Space was launched on ZeroGPU hardware,
+# register a dummy @spaces.GPU hook so ZeroGPU supervisor does not trigger a shutdown.
+try:
+    import spaces
+
+    @spaces.GPU
+    def _zero_gpu_keepalive():
+        return True
+
+    _zero_gpu_keepalive()
+except Exception:
+    pass
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 7860))
     print(f"Starting SahayakAI on 0.0.0.0:{port}...")
