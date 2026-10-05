@@ -15,7 +15,6 @@ try:
     from langchain_text_splitters import RecursiveCharacterTextSplitter
 except ImportError:
     from langchain.text_splitter import RecursiveCharacterTextSplitter
-
 from langchain_community.document_loaders import Docx2txtLoader, PyPDFLoader, TextLoader
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
@@ -40,14 +39,23 @@ class RAGStoreMixin(SessionStoreMixin):
         self._base_vector_db_dir.mkdir(parents=True, exist_ok=True)
         self._session_stores: Dict[str, Optional[FAISS]] = {}
 
-        self.embedding_model = HuggingFaceEmbeddings(
-            model_name=os.getenv(
-                "EMBEDDING_MODEL",
-                "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
-            ),
-            model_kwargs={"device": "cpu", "local_files_only": True},
-            encode_kwargs={"normalize_embeddings": True},
+        model_name = os.getenv(
+            "EMBEDDING_MODEL",
+            "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
         )
+        try:
+            self.embedding_model = HuggingFaceEmbeddings(
+                model_name=model_name,
+                model_kwargs={"device": "cpu", "local_files_only": True},
+                encode_kwargs={"normalize_embeddings": True},
+            )
+        except Exception:
+            logger.info("Local cached embedding model not found; downloading from Hugging Face...")
+            self.embedding_model = HuggingFaceEmbeddings(
+                model_name=model_name,
+                model_kwargs={"device": "cpu"},
+                encode_kwargs={"normalize_embeddings": True},
+            )
         self.splitter = RecursiveCharacterTextSplitter(
             chunk_size=900, chunk_overlap=150, separators=["\n\n", "\n", " ", ""],
         )
