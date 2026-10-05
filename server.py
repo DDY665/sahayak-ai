@@ -19,17 +19,6 @@ if "app" in sys.modules and not hasattr(sys.modules["app"], "__path__"):
 import uvicorn
 from app.main import app
 
-# Optional companion Gradio status page for HF Gradio SDK healthcheck probe
-try:
-    import gradio as gr
-
-    with gr.Blocks(title="SahayakAI Status") as status_ui:
-        gr.Markdown("## 🎓 SahayakAI Server is Online\nNavigate to `/` to use the interactive application.")
-
-    app = gr.mount_gradio_app(app, status_ui, path="/gradio")
-except Exception:
-    pass
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 7860))
     print(f"Starting SahayakAI on 0.0.0.0:{port}...")

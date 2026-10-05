@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from typing import Optional
+import certifi
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from app.core.logging_utils import configure_logging
 
@@ -22,7 +23,13 @@ async def connect_db() -> Optional[AsyncIOMotorDatabase]:
         return None
 
     try:
-        _client = AsyncIOMotorClient(mongo_uri)
+        # Use certifi CA bundle to ensure valid TLS handshake on Linux containers
+        # Use 5000ms timeout so startup never hangs
+        client_kwargs = {
+            "serverSelectionTimeoutMS": 5000,
+            "tlsCAFile": certifi.where(),
+        }
+        _client = AsyncIOMotorClient(mongo_uri, **client_kwargs)
         db_name = "sahayakai"
         if "/" in mongo_uri:
             parsed = mongo_uri.split("/")[-1].split("?")[0]
@@ -38,7 +45,11 @@ async def connect_db() -> Optional[AsyncIOMotorDatabase]:
         logger.info(f"MongoDB connected successfully to database: {db_name}")
         return _db
     except Exception as exc:
-        logger.error(f"Failed to connect to MongoDB: {exc}", exc_info=True)
+        logger.warning(
+            f"MongoDB connection failed: {exc}. "
+            "Please check MongoDB Atlas Network Access (allow 0.0.0.0/0). "
+            "Continuing server startup..."
+        )
         return None
 
 
