@@ -1,0 +1,70 @@
+from __future__ import annotations
+
+
+def _language_defaults(language: str) -> dict:
+    key = str(language or "English").strip().lower()
+    if key == "hindi":
+        return {
+            "doc_title": "अपलोड किया गया दस्तावेज़",
+            "crux": "इस दस्तावेज़ में महत्वपूर्ण जानकारी है, जिसमें तिथियां, राशियां या अन्य मुख्य विवरण शामिल हो सकते हैं।",
+            "summary": "दस्तावेज़ सफलतापूर्वक अपलोड हो गया है। अब आप इससे संबंधित प्रश्न पूछ सकते हैं।",
+            "important_date_label": "महत्वपूर्ण तिथि",
+            "important_date_note": "यह किसी समय-सीमा या डेडलाइन से जुड़ी महत्वपूर्ण जानकारी हो सकती है।",
+            "amount_label": "राशि",
+            "amount_note": "दस्तावेज़ में एक वित्तीय राशि मिली है।",
+            "reference_id_label": "संदर्भ आईडी",
+            "reference_id_note": "दस्तावेज़ में एक संभावित संदर्भ पहचानकर्ता मिला है।",
+            "medical_detail_label": "मेडिकल विवरण",
+            "medical_detail_note": "दस्तावेज़ में {keyword} का उल्लेख है, जो चिकित्सकीय रूप से महत्वपूर्ण हो सकता है।",
+            "diagnostic_label": "डायग्नोस्टिक संकेत",
+            "diagnostic_note": "जांच/रिपोर्ट में महत्वपूर्ण संकेत: {value}",
+            "symptom_label": "लक्षण",
+            "symptom_note": "संभावित लक्षण/क्लिनिकल संदर्भ: {value}",
+            "deadline_label": "डेडलाइन",
+            "deadline_note": "यह समय-सीमा या अंतिम तिथि से जुड़ा बिंदु है।",
+            "text_extracted_name": "पाठ निकाला गया",
+            "text_extracted_note": "दस्तावेज़ का पाठ निकाला गया है; विस्तृत उत्तर के लिए प्रश्न पूछें।",
+        }
+    if key == "telugu":
+        return {
+            "doc_title": "అప్‌లోడ్ చేసిన పత్రం",
+            "crux": "ఈ పత్రంలో తేదీలు, మొత్తాలు లేదా ఇతర ముఖ్యమైన వివరాలు ఉండే అవకాశం ఉంది.",
+            "summary": "పత్రం విజయవంతంగా అప్‌లోడ్ చేయబడింది. ఇప్పుడు దీనిపై ప్రశ్నలు అడగవచ్చు.",
+            "important_date_label": "ముఖ్యమైన తేదీ",
+            "important_date_note": "ఇది టైమ్‌లైన్ లేదా గడువు తేదీకి సంబంధించిన కీలక సమాచారం కావచ్చు.",
+            "amount_label": "మొత్తం",
+            "amount_note": "పత్రంలో ఒక ఆర్థిక మొత్తం కనిపించింది.",
+            "reference_id_label": "రిఫరెన్స్ ఐడి",
+            "reference_id_note": "పత్రంలో ఒక సాధ్యమైన సూచిక గుర్తింపు కనిపించింది.",
+            "medical_detail_label": "వైద్య వివరాలు",
+            "medical_detail_note": "పత్రంలో {keyword} ప్రస్తావించబడింది, ఇది వైద్యపరంగా ముఖ్యమైనది కావచ్చు.",
+            "diagnostic_label": "నిర్ధారణ సంకేతం",
+            "diagnostic_note": "పరీక్ష/నివేదికలో ముఖ్య సంకేతం: {value}",
+            "symptom_label": "లక్షణం",
+            "symptom_note": "సంభావ్య లక్షణం/క్లినికల్ సూచన: {value}",
+            "deadline_label": "గడువు",
+            "deadline_note": "ఇది గడువు లేదా చివరి తేదీకి సంబంధించిన అంశం.",
+            "text_extracted_name": "పాఠ్యం సేకరించబడింది",
+            "text_extracted_note": "పత్రం నుండి పాఠ్యం సేకరించబడింది; వివరమైన సమాధానాల కోసం ప్రశ్న అడగండి.",
+        }
+    return {
+        "doc_title": "Uploaded Document",
+        "crux": "This document contains uploaded content that can be searched and summarized.",
+        "summary": "Document uploaded successfully. You can now ask questions about it.",
+        "important_date_label": "Important date",
+        "important_date_note": "This looks like a timeline or deadline that may matter.",
+        "amount_label": "Amount",
+        "amount_note": "A monetary value appears in the document.",
+        "reference_id_label": "Reference ID",
+        "reference_id_note": "A possible document reference identifier was found.",
+        "medical_detail_label": "Medical detail",
+        "medical_detail_note": "The document mentions {keyword}, which may be medically important.",
+        "diagnostic_label": "Diagnostic finding",
+        "diagnostic_note": "Important diagnostic signal in report: {value}",
+        "symptom_label": "Symptom",
+        "symptom_note": "Possible symptom/clinical context: {value}",
+        "deadline_label": "Deadline",
+        "deadline_note": "This item relates to a due date or time-bound action.",
+        "text_extracted_name": "Text extracted",
+        "text_extracted_note": "Document text was extracted; ask a question for detailed answers.",
+    }

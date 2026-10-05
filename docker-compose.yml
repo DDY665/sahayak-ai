@@ -1,0 +1,61 @@
+version: "3.8"
+
+services:
+  # ==========================================
+  # SahayakAI Unified Application
+  # React SPA (Frontend) + FastAPI RAG (Backend)
+  # ==========================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sahayakai:latest
+    container_name: sahayakai_app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - PORT=8000
+      - VECTOR_DB_DIR=/app/vectorstore
+      - UPLOAD_DIR=/app/uploads
+      - MONGO_URI=${MONGO_URI:-mongodb://mongodb:27017/sahayakai}
+      - JWT_SECRET=${JWT_SECRET:-sahayakai_production_jwt_secret_change_me}
+      - GROQ_CHAT_API_KEY=${GROQ_CHAT_API_KEY}
+      - GROQ_SUMMARY_API_KEY=${GROQ_SUMMARY_API_KEY}
+      - GROQ_MODEL=${GROQ_MODEL:-openai/gpt-oss-120b}
+      - LLM_PROVIDER=${LLM_PROVIDER:-groq}
+    volumes:
+      - sahayakai_uploads:/app/uploads
+      - sahayakai_vectorstore:/app/vectorstore
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ==========================================
+  # MongoDB Database (Local Service)
+  # Automatically used if MONGO_URI is not set to Atlas
+  # ==========================================
+  mongodb:
+    image: mongo:7.0
+    container_name: sahayakai_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - sahayakai_mongodb:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+
+volumes:
+  sahayakai_uploads:
+    name: sahayakai_uploads
+  sahayakai_vectorstore:
+    name: sahayakai_vectorstore
+  sahayakai_mongodb:
+    name: sahayakai_mongodb

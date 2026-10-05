@@ -1,0 +1,59 @@
+html, body { height: 100%; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+#root { min-height: 100%; }
+
+:root {
+  --bg: #F7F5F0;
+  --surface: #FFFFFF;
+  --border: #E2DDD6;
+  --text: #1A1814;
+  --muted: #8A8479;
+  --accent: #2D6A4F;
+  --accent-light: #E8F4EE;
+  --danger: #C0392B;
+  --user-bubble: #2D6A4F;
+  --ai-bubble: #FFFFFF;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* DARK MODE VARIABLES */
+body.dark {
+  --bg: #0F0F0D;
+  --surface: #1A1916;
+  --border: #2A2824;
+  --text: #F0EDE8;
+  --muted: #6B6760;
+  --accent: #4CAF7D;
+  --accent-light: #1A2E22;
+  --ai-bubble: #1A1916;
+}
+
+/* SCROLLBARS */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-5px); }
+}
+
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.3); }
+  50% { box-shadow: 0 0 0 6px rgba(229, 57, 53, 0); }
+}

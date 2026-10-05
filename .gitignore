@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+.venv*/
+venv/
+
+# Application runtime data
+**/uploads/*
+!**/uploads/.gitkeep
+**/vectorstore/*
+!**/vectorstore/.gitkeep
+
+# Node
+**/node_modules/
+**/dist/
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.docker.example
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
