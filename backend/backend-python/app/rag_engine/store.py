@@ -6,8 +6,16 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from dotenv import load_dotenv
-from langchain.prompts import ChatPromptTemplate
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+try:
+    from langchain_core.prompts import ChatPromptTemplate
+except ImportError:
+    from langchain.prompts import ChatPromptTemplate
+
+try:
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+except ImportError:
+    from langchain.text_splitter import RecursiveCharacterTextSplitter
+
 from langchain_community.document_loaders import Docx2txtLoader, PyPDFLoader, TextLoader
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
@@ -20,9 +28,10 @@ from app.rag_engine.ocr import extract_ocr_from_pdf, extract_ocr_from_image
 load_dotenv()
 logger = logging.getLogger(__name__)
 
-# Force offline loading to eliminate remote HuggingFace timeouts on Windows
-os.environ["HF_HUB_OFFLINE"] = "1"
-os.environ["TRANSFORMERS_OFFLINE"] = "1"
+# Only force offline if explicitly requested; allow online download in cloud containers
+if os.getenv("FORCE_OFFLINE") == "1":
+    os.environ["HF_HUB_OFFLINE"] = "1"
+    os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
 
 class RAGStoreMixin(SessionStoreMixin):
