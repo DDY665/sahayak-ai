@@ -1,5 +1,11 @@
 // API Configuration
-export const API_BASE_URL = "http://localhost:8000";
+export const API_BASE_URL = (() => {
+  if (typeof window === "undefined") return "http://localhost:8000";
+  if (window.location.port === "5173") {
+    return import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+  }
+  return "";
+})();
 export const API_ENDPOINTS = {
   HEALTH: "/health",
   UPLOAD: "/api/upload",

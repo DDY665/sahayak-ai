@@ -89,7 +89,12 @@ def _resolve_upload_dir(user_id: str | None, chat_id: str | None) -> Path:
 
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok", "service": "SahayakAI FastAPI 2.0"}
+    return {
+        "status": "ok",
+        "service": "SahayakAI FastAPI 2.0",
+        "node": "ok",
+        "python": "ok",
+    }
 
 
 @app.post("/api/upload")

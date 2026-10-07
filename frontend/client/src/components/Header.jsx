@@ -1,5 +1,9 @@
 export default function Header({ theme, onToggleTheme, health, uiText, mobileMenuOpen, onToggleMobileMenu }) {
-  const healthy = health?.node === "ok" && health?.python === "ok";
+  const healthy = Boolean(
+    health?.status === "ok" ||
+    health?.python === "ok" ||
+    (health?.node === "ok" && health?.python === "ok")
+  );
   const text = uiText || {
     dark: "Dark",
     light: "Light",
